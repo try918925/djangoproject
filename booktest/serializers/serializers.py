@@ -17,3 +17,10 @@ class UserinfoSerializer(serializers.ModelSerializer):
         model = Userinfo
         fields = "__all__"
 
+
+
+class BuildingAareaSerializers(serializers.ModelSerializer):
+    class Meta:
+        model = Userinfo
+        fields = ["id", "username"]
+

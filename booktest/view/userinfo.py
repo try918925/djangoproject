@@ -11,6 +11,7 @@ class UserinfoViewSet(viewsets.ModelViewSet):
     queryset = Userinfo.objects.all()
     serializer_class = UserinfoSerializer
     print(serializer_class)
+
     # permission_classes = [IsAuthenticated]
 
     def create(self, request, *args, **kwargs):
@@ -33,7 +34,6 @@ class UserinfoViewSet(viewsets.ModelViewSet):
         self.perform_destroy(instance)
         return Response(status=status.HTTP_204_NO_CONTENT)
 
-
     def list(self, request, *args, **kwargs):
         queryset = self.filter_queryset(self.get_queryset())
         page = self.paginate_queryset(queryset)
@@ -43,8 +43,6 @@ class UserinfoViewSet(viewsets.ModelViewSet):
 
         serializer = self.get_serializer(queryset, many=True)
         return Response(serializer.data)
-
-
 
     def get_personnel(self, request, *args, **kwargs):
         personnel_id = kwargs.get('personnel_id')
@@ -58,4 +56,29 @@ class UserinfoViewSet(viewsets.ModelViewSet):
 
         return Response({"message": "Invalid personnel_id"}, status=status.HTTP_400_BAD_REQUEST)
 
+    @action(detail=False, methods=['POST'])
+    def building_area(self, request, *args, **kwargs):
+        first_name = request.data.get('first_name')
+        address = request.data.get('address')
+        is_active = request.data.get('is_active')
 
+        # 如果请求体中没有任何参数，则返回空数据响应
+        if not first_name and not address and not is_active:
+            return Response({"detail": "没有数据"})
+
+        queryset = Userinfo.objects.all()
+
+        # 根据传入的参数过滤数据集
+        if first_name:
+            queryset = queryset.filter(first_name=first_name)
+        if queryset and address:
+            queryset = queryset.filter(address=address)
+        if queryset and isinstance(is_active,bool):  # 注意处理布尔类型的参数
+            queryset = queryset.filter(is_active=is_active)
+
+
+        # 只返回id和username字段
+        if not queryset:
+            return Response({"detail": "没有数据"})
+        queryset = queryset.values("id", "username")
+        return Response([data for data in queryset])
